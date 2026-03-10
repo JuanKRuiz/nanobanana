@@ -86,29 +86,44 @@ export class ImageGenerator {
   }
 
   static validateAuthentication(): AuthConfig {
+    const nanoKey = process.env.NANOBANANA_API_KEY;
+    if (nanoKey) {
+      console.error('✓ Found NANOBANANA_API_KEY environment variable');
+      return { apiKey: nanoKey };
+    }
+
     const nanoGeminiKey = process.env.NANOBANANA_GEMINI_API_KEY;
     if (nanoGeminiKey) {
+      console.error('✓ Found NANOBANANA_GEMINI_API_KEY environment variable (fallback)');
       return { apiKey: nanoGeminiKey, keyType: 'GEMINI_API_KEY' };
     }
 
     const nanoGoogleKey = process.env.NANOBANANA_GOOGLE_API_KEY;
     if (nanoGoogleKey) {
+      console.error('✓ Found NANOBANANA_GOOGLE_API_KEY environment variable (fallback)');
       return { apiKey: nanoGoogleKey, keyType: 'GOOGLE_API_KEY' };
     }
 
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey) {
+      console.error(
+        '✓ Found GEMINI_API_KEY environment variable (fallback)',
+      );
       return { apiKey: geminiKey, keyType: 'GEMINI_API_KEY' };
     }
 
     const googleKey = process.env.GOOGLE_API_KEY;
     if (googleKey) {
+      console.error(
+        '✓ Found GOOGLE_API_KEY environment variable (fallback)',
+      );
       return { apiKey: googleKey, keyType: 'GOOGLE_API_KEY' };
     }
 
     throw new Error(
-      'ERROR: No valid API key found. Please set NANOBANANA_GEMINI_API_KEY, NANOBANANA_GOOGLE_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY environment variable.\n' +
-        'For more details on authentication, visit: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/authentication.md',
+      'ERROR: No valid API key found. Please set NANOBANANA_API_KEY environment variable.\n' +
+        'Fallback variables: NANOBANANA_GEMINI_API_KEY, NANOBANANA_GOOGLE_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEY.\n' +
+        'For more details on authentication, visit: https://geminicli.com/docs/get-started/authentication/',
     );
   }
 
@@ -311,7 +326,7 @@ export class ImageGenerator {
       error instanceof Error ? error.message : String(error).toLowerCase();
 
     if (errorMessage.includes('api key not valid')) {
-      return 'Authentication failed: The provided API key is invalid. Please check your NANOBANANA_GEMINI_API_KEY environment variable.';
+      return 'Authentication failed: The provided API key is invalid. Please check your NANOBANANA_API_KEY environment variable.';
     }
 
     if (errorMessage.includes('permission denied')) {
@@ -338,7 +353,7 @@ export class ImageGenerator {
         case 400:
           return 'The request was malformed. This may be due to an issue with the prompt. Please check for safety violations or unsupported content.';
         case 403: // General permission error if specific message not caught
-          return 'Authentication failed. Please ensure your API key (e.g., NANOBANANA_GEMINI_API_KEY) is valid and has the necessary permissions.';
+          return 'Authentication failed. Please ensure your API key (e.g., NANOBANANA_API_KEY) is valid and has the necessary permissions.';
         case 500:
           return 'The image generation service encountered a temporary internal error. Please try again later.';
         default:
